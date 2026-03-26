@@ -1,5 +1,5 @@
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react'
-import { useFrame, useLoader, useThree } from '@react-three/fiber'
+import { useFrame, useLoader } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
@@ -244,28 +244,59 @@ function GlowPoint({ position, color, size = 0.04, delay = 0, isActive, onActiva
 }
 
 // ============================================================
-// 航线
+// 航线 — 使用海洋寻路绕过大陆
 // ============================================================
-function RouteLine({ points, color, isActive }) {
+function RouteLine({ routes, color, isActive }) {
   const [progress, setProgress] = useState(0)
   useEffect(() => { if (!isActive) setProgress(0) }, [isActive])
   useFrame((_, delta) => {
-    if (isActive && progress < 1) setProgress(prev => Math.min(prev + delta * 0.5, 1))
+    if (isActive && progress < 1) setProgress(prev => Math.min(prev + delta * 0.4, 1))
   })
 
   const curvePoints = useMemo(() => {
-    if (points.length < 2) return []
+    if (!routes || routes.length < 2) return []
+
+    const R = GLOBE_RADIUS + 0.012
     const allPoints = []
-    for (let i = 0; i < points.length - 1; i++) {
-      const start = points[i], end = points[i + 1]
-      const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5)
-      const dist = start.distanceTo(end)
-      mid.normalize().multiplyScalar(GLOBE_RADIUS + dist * 0.12)
-      const curve = new THREE.QuadraticBezierCurve3(start, mid, end)
-      allPoints.push(...curve.getPoints(24))
+
+    // 展开所有路径点（包括 waypoints）
+    const expandedPath = []
+    for (let i = 0; i < routes.length; i++) {
+      expandedPath.push([routes[i].lat, routes[i].lng])
+      // 如果有 waypoints，插入到当前点和下一个点之间
+      if (routes[i].waypoints && i < routes.length - 1) {
+        for (const wp of routes[i].waypoints) {
+          expandedPath.push(wp)
+        }
+      }
     }
+
+    // 将展开的路径转为3D弧线
+    for (let i = 0; i < expandedPath.length - 1; i++) {
+      const [lat1, lng1] = expandedPath[i]
+      const [lat2, lng2] = expandedPath[i + 1]
+      const start = latLngToVector3(lat1, lng1, R)
+      const end = latLngToVector3(lat2, lng2, R)
+      const dist = start.distanceTo(end)
+
+      if (dist < 0.3) {
+        const steps = 4
+        for (let j = 0; j <= steps; j++) {
+          const t = j / steps
+          const p = new THREE.Vector3().lerpVectors(start, end, t)
+          p.normalize().multiplyScalar(R)
+          allPoints.push(p)
+        }
+      } else {
+        const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5)
+        mid.normalize().multiplyScalar(R + dist * 0.05)
+        const curve = new THREE.QuadraticBezierCurve3(start, mid, end)
+        allPoints.push(...curve.getPoints(12))
+      }
+    }
+
     return allPoints
-  }, [points])
+  }, [routes])
 
   if (curvePoints.length === 0 || !isActive) return null
   const visibleCount = Math.floor(curvePoints.length * progress)
@@ -278,6 +309,7 @@ function RouteLine({ points, color, isActive }) {
     </line>
   )
 }
+
 
 // ============================================================
 // 相机自动跟踪控制器
@@ -390,7 +422,7 @@ export default function Globe({ selectedExplorer, explorerData }) {
 
   const routePoints = useMemo(() => {
     if (!activeExplorer) return []
-    return activeExplorer.routes.map(r => latLngToVector3(r.lat, r.lng, GLOBE_RADIUS + 0.012))
+    return activeExplorer.routes
   }, [activeExplorer])
 
   // 无选中时缓慢自转（通过旋转相机）
@@ -434,7 +466,7 @@ export default function Globe({ selectedExplorer, explorerData }) {
 
         {activeExplorer && (
           <RouteLine
-            points={routePoints}
+            routes={routePoints}
             color={activeExplorer.color}
             isActive={!!selectedExplorer}
           />
