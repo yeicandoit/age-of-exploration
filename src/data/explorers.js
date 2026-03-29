@@ -362,6 +362,89 @@ const explorers = [
         waypoints: [[-10, -175], [-5, 155], [-8, 120], [-10, 90], [-20, 60], [-33, 20], [-15, -5], [20, -15], [40, -8]] },
     ]
   },
+  // ============ 俄罗斯探险家 ============
+  {
+    id: 'yermak',
+    name: '叶尔马克',
+    nameEn: 'Yermak Timofeyevich',
+    country: '俄罗斯',
+    color: '#ee3355',
+    routes: [
+      { name: '索利卡姆斯克（出发地）', lat: 59.6, lng: 56.8, year: 1581 },
+      { name: '秋明（西伯利亚入口）', lat: 57.2, lng: 65.5, year: 1581 },
+      { name: '卡什雷克（西伯利亚汗国首都）', lat: 58.2, lng: 68.3, year: 1582 },
+      { name: '托博尔斯克', lat: 58.2, lng: 68.3, year: 1583 },
+      { name: '额尔齐斯河流域', lat: 57, lng: 73, year: 1584 },
+    ]
+  },
+  {
+    id: 'moskvitin',
+    name: '莫斯克维京',
+    nameEn: 'Ivan Moskvitin',
+    country: '俄罗斯',
+    color: '#dd2244',
+    routes: [
+      { name: '雅库茨克', lat: 62.0, lng: 129.7, year: 1639 },
+      { name: '朱格朱尔山脉', lat: 58, lng: 136, year: 1639 },
+      { name: '鄂霍次克海沿岸', lat: 56, lng: 138, year: 1639 },
+      { name: '尚塔尔群岛', lat: 55, lng: 137.5, year: 1640 },
+    ]
+  },
+  {
+    id: 'dezhnev',
+    name: '杰日尼奥夫',
+    nameEn: 'Semyon Dezhnev',
+    country: '俄罗斯',
+    color: '#cc1133',
+    routes: [
+      { name: '雅库茨克', lat: 62.0, lng: 129.7, year: 1648 },
+      { name: '中科雷马河', lat: 65, lng: 153, year: 1648 },
+      { name: '科雷马河口', lat: 69.5, lng: 161, year: 1648,
+        waypoints: [[67, 158]] },
+      { name: '杰日尼奥夫角（亚洲最东端）', lat: 66.1, lng: -169.7, year: 1648,
+        waypoints: [[70, 170], [68, 178], [66.5, -175]] },
+      { name: '阿纳德尔河口', lat: 64.7, lng: -176.2, year: 1649 },
+    ]
+  },
+  {
+    id: 'bering',
+    name: '白令',
+    nameEn: 'Vitus Bering',
+    country: '俄罗斯',
+    color: '#bb0022',
+    routes: [
+      { name: '圣彼得堡', lat: 59.9, lng: 30.3, year: 1725 },
+      { name: '托博尔斯克', lat: 58.2, lng: 68.3, year: 1725 },
+      { name: '雅库茨克', lat: 62.0, lng: 129.7, year: 1726 },
+      { name: '鄂霍次克', lat: 59.4, lng: 143.2, year: 1727 },
+      { name: '堪察加半岛（下堪察加）', lat: 56, lng: 162, year: 1728,
+        waypoints: [[57, 150], [55, 157]] },
+      { name: '白令海峡', lat: 65.8, lng: -169, year: 1728,
+        waypoints: [[58, 165], [62, 172], [65, 178], [66, -174]] },
+      { name: '堪察加彼得罗巴甫洛夫斯克', lat: 53.0, lng: 158.6, year: 1740,
+        waypoints: [[64, -172], [62, 175], [58, 168], [55, 162]] },
+      { name: '阿拉斯加（圣伊莱亚斯山）', lat: 60.3, lng: -141, year: 1741,
+        waypoints: [[54, 165], [55, 175], [57, -175], [59, -160], [60, -148]] },
+      { name: '白令岛（遇难地）', lat: 55.0, lng: 166.0, year: 1741,
+        waypoints: [[59, -148], [57, -165], [56, 175], [55, 170]] },
+    ]
+  },
+  {
+    id: 'chirikov',
+    name: '奇里科夫',
+    nameEn: 'Aleksei Chirikov',
+    country: '俄罗斯',
+    color: '#aa0033',
+    routes: [
+      { name: '堪察加彼得罗巴甫洛夫斯克', lat: 53.0, lng: 158.6, year: 1741 },
+      { name: '阿拉斯加东南沿海', lat: 55.4, lng: -134, year: 1741,
+        waypoints: [[54, 165], [55, 175], [55, -175], [55, -160], [55, -145]] },
+      { name: '阿留申群岛（阿达克岛）', lat: 51.8, lng: -176.6, year: 1741,
+        waypoints: [[54, -140], [53, -155], [52, -170]] },
+      { name: '堪察加（返回）', lat: 53.0, lng: 158.6, year: 1741,
+        waypoints: [[52, 180], [53, 165]] },
+    ]
+  },
 ];
 
 export const countryColors = {
@@ -371,6 +454,7 @@ export const countryColors = {
   '英国': '#4488ff',
   '荷兰': '#ff6600',
   '法国': '#aa33ee',
+  '俄罗斯': '#cc1133',
 };
 
 export default explorers;
