@@ -7,7 +7,7 @@ const GLOBE_RADIUS = 2
 const DEG2RAD = Math.PI / 180
 const ILLUMINATE_RADIUS = 0.9
 const POINT_DELAY = 800
-const MAX_LIGHTS = 32
+const MAX_LIGHTS = 64
 
 function latLngToVector3(lat, lng, radius = GLOBE_RADIUS) {
   const phi = (90 - lat) * DEG2RAD
@@ -374,17 +374,32 @@ export default function Globe({ selectedExplorer, explorerData }) {
   const controlsRef = useRef()
   const [activatedIndices, setActivatedIndices] = useState(new Set())
   const [currentTrackPoint, setCurrentTrackPoint] = useState(null)
+  // 累积所有历史点亮的坐标（不随航海家切换清空）
+  const [historyPoints, setHistoryPoints] = useState([])
+  const prevExplorerRef = useRef(null)
 
   const activeExplorer = useMemo(() => {
     if (!selectedExplorer || !explorerData) return null
     return explorerData.find(e => e.id === selectedExplorer)
   }, [selectedExplorer, explorerData])
 
-  // 切换航海家时重置
+  // 切换航海家时：把前一个航海家已激活的点存入历史
   useEffect(() => {
+    const prevExplorer = prevExplorerRef.current
+    if (prevExplorer && prevExplorer.id !== selectedExplorer) {
+      // 把前一个航海家的已激活点加入历史
+      setHistoryPoints(prev => {
+        const newPoints = [...prev]
+        prevExplorer.routes.forEach((route) => {
+          newPoints.push(latLngToVector3(route.lat, route.lng, GLOBE_RADIUS))
+        })
+        return newPoints
+      })
+    }
     setActivatedIndices(new Set())
     setCurrentTrackPoint(null)
-  }, [selectedExplorer])
+    prevExplorerRef.current = activeExplorer
+  }, [selectedExplorer, activeExplorer])
 
   const handlePointActivate = useCallback((index) => {
     setActivatedIndices(prev => {
@@ -392,7 +407,6 @@ export default function Globe({ selectedExplorer, explorerData }) {
       next.add(index)
       return next
     })
-    // 设置相机跟踪目标为刚激活的点
     if (activeExplorer) {
       const route = activeExplorer.routes[index]
       if (route) {
@@ -409,7 +423,8 @@ export default function Globe({ selectedExplorer, explorerData }) {
     }
   }, [activeExplorer])
 
-  const activePointsLocal = useMemo(() => {
+  // 当前航海家已激活的点
+  const currentActivePoints = useMemo(() => {
     if (!activeExplorer) return []
     const pts = []
     activeExplorer.routes.forEach((route, i) => {
@@ -420,12 +435,17 @@ export default function Globe({ selectedExplorer, explorerData }) {
     return pts
   }, [activeExplorer, activatedIndices])
 
+  // 传给 shader 的全部点亮坐标 = 历史 + 当前
+  const allLitPoints = useMemo(() => {
+    return [...historyPoints, ...currentActivePoints]
+  }, [historyPoints, currentActivePoints])
+
   const routePoints = useMemo(() => {
     if (!activeExplorer) return []
     return activeExplorer.routes
   }, [activeExplorer])
 
-  // 无选中时缓慢自转（通过旋转相机）
+  // 无选中时缓慢自转
   useFrame((_, delta) => {
     if (!selectedExplorer && controlsRef.current) {
       const controls = controlsRef.current
@@ -459,7 +479,7 @@ export default function Globe({ selectedExplorer, explorerData }) {
 
       <group>
         <EarthSphere
-          activePointsLocal={activePointsLocal}
+          activePointsLocal={allLitPoints}
           explorerColor={activeExplorer?.color}
         />
         <GlobeGrid />
@@ -490,3 +510,4 @@ export default function Globe({ selectedExplorer, explorerData }) {
     </>
   )
 }
+
